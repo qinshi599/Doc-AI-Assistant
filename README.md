@@ -17,7 +17,7 @@ Want to become a trivia master? I'll build a comprehensive knowledge base where 
 
 It's pretty simple - you ask it questions about IT stuff (limited to Azure, Windows Server, M365, Security in this demo), and it gives you answers based on actual Microsoft documentation. No more "have you tried turning it off and on again?" responses! 😅
 
-**Live Demo**: [Check it out here](https://itdoc-ai-assistant.vercel.app) 
+**Live Demo**: [Check it out here][(https://doc-ai-assistant-seven.vercel.app/)]
 
 ## 🛠️ Tech Stack
 
