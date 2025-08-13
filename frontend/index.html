@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITDoc AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7f7f8;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e5e5;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #202123;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: #6e6e80;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 768px;
+            margin: 0 auto;
+            width: 100%;
+            background: #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #6b7280;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .message-content {
+            flex: 1;
+            padding: 0.75rem 0;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .user-message .message-content {
+            background: #10a37f;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem 1rem 0.25rem 1rem;
+            max-width: 80%;
+        }
+
+        .bot-message .message-content {
+            background: #f1f5f9;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem 1rem 1rem 0.25rem;
+            border: 1px solid #e2e8f0;
+            max-width: 85%;
+        }
+
+        .references {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .references-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .reference-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #10a37f;
+            text-decoration: none;
+            margin-right: 1rem;
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .reference-link:hover {
+            background: #f0fdf4;
+            text-decoration: none;
+        }
+
+        .input-area {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e5e5;
+            background: #f9fafb;
+        }
+
+        .input-wrapper {
+            position: relative;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #10a37f;
+            box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: 0.75rem 3rem 0.75rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            resize: none;
+            background: transparent;
+            min-height: 24px;
+            max-height: 120px;
+        }
+
+        #messageInput::placeholder {
+            color: #9ca3af;
+        }
+
+        #sendButton {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #10a37f;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            background: #0d8168;
+        }
+
+        #sendButton:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .loading::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10a37f;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Scrollbar styling */
+        .messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 2px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 0;
+                box-shadow: none;
+                height: 100vh;
+            }
+            
+            .messages {
+                padding: 1rem;
+            }
+            
+            .input-area {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ITDoc Assistant</h1>
+        <p>Your IT documentation helper</p>
+    </div>
+
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="welcome-message">
+                👋 Hello! I can help you find information about Azure, Windows Server, Security, and Microsoft 365. What would you like to know?
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Type your question here..." 
+                    rows="2"
+                    maxlength="500"
+                ></textarea>
+                <button id="sendButton">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content;
+            
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showLoading() {
+            addMessage('<div class="loading">I am working for you now...</div>');
+            sendButton.disabled = true;
+        }
+
+        function hideLoading() {
+            const loadingMsg = messagesContainer.querySelector('.loading');
+            if (loadingMsg) {
+                loadingMsg.parentElement.remove();
+            }
+            sendButton.disabled = false;
+        }
+
+        async function sendMessage() {
+            const question = messageInput.value.trim();
+            if (!question) return;
+
+            // Add user message
+            addMessage(question, true);
+            messageInput.value = '';
+            
+            // Show loading
+            showLoading();
+
+            try {
+                const response = await fetch('http://localhost:3001/api/ask-langchain', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+                hideLoading();
+
+                if (response.ok) {
+                    // Convert \n to <br> and **text** to <strong>text</strong>
+                    let botResponse = data.answer
+                        .replace(/\n/g, '<br>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    
+                    // Add references if available
+                    if (data.references && data.references.length > 0) {
+                        botResponse += '<div class="references">';
+                        botResponse += '<div class="references-title">📚 References</div>';
+                        data.references.forEach(ref => {
+                            botResponse += `<a href="${ref.url}" target="_blank" class="reference-link">📖 ${ref.title}</a>`;
+                        });
+                        botResponse += '</div>';
+                    }
+                    
+                    addMessage(botResponse);
+                } else {
+                    addMessage('Sorry, there was an error processing your question.');
+                }
+            } catch (error) {
+                hideLoading();
+                addMessage('Sorry, I cannot connect to the server right now.');
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+    </script>
+</body>
+</html>
