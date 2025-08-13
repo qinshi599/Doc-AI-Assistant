@@ -17,7 +17,8 @@ Want to become a trivia master? I'll build a comprehensive knowledge base where 
 
 It's pretty simple - you ask it questions about IT stuff (limited to Azure, Windows Server, M365, Security in this demo), and it gives you answers based on actual Microsoft documentation. No more "have you tried turning it off and on again?" responses! 😅
 
-https://github.com/qinshi599/Doc-AI-Assistant/blob/main/demo.mov
+https://github.com/qinshi599/Doc-AI-Assistant/blob/main/demo1.png
+https://github.com/qinshi599/Doc-AI-Assistant/blob/main/demo2.png
 ## 🛠️ Tech Stack
 
 I went with:
